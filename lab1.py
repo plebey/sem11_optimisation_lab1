@@ -28,15 +28,13 @@ class Func:
         # Создание координатной сетки
         return np.meshgrid(x_limits, y_limits)
 
-    def quadratic(self):
+    def calc_quadratic(self):
         f = np.zeros(self.xy.shape[1])
         size = np.size(self.xy, 1)
         for i in range(size):
             pp = self.xy[:, i]
             f[i] = np.dot(np.dot(pp.T, self.theta), pp) + np.dot(pp.T, self.a) + self.c
         return f
-
-
 
     def lab_one_quadratic(self, f):
         f = f.reshape(self.cx.shape)
@@ -76,6 +74,46 @@ class Func:
         for i in range(len(L)):
             vect = V[:, i]
             ax2.plot([x0[0], x0[0] + vect[0]], [x0[1], x0[1] + vect[1]])
+
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def calc_banana():
+        # Пределы и шаг изменения координат
+        x = np.linspace(-2, 2, 100)
+        y = np.linspace(-1, 3, 100)
+
+        # Создание координатной сетки
+        cx, cy = np.meshgrid(x, y)
+        # Объединение cx и cy в единый массив
+        xy = np.vstack((cx.ravel(), cy.ravel()))
+
+        if xy.shape[0] != 2:
+            raise ValueError('Входной аргумент должен иметь размерность 2xN')
+
+        # Вычисление значения функции
+        f = 100 * (xy[1, :] - xy[0, :] ** 2) ** 2 + (1 - xy[0, :]) ** 2
+        Func.lab_one_banana(f, cx, cy)
+        return f
+    @staticmethod
+    def lab_one_banana(f, cx, cy):
+        f = f.reshape(cx.shape)
+
+        fig = plt.figure(figsize=(12, 9))
+
+        ax1 = fig.add_subplot(121, projection='3d')
+        ax1.set_title("Mesh Plot")
+        ax1.plot_wireframe(cx, cy, f, cmap="viridis")
+
+        ax2 = fig.add_subplot(122)
+        ax2.set_title("Contour Plot")
+        contour = ax2.contour(cx, cy, f, cmap="viridis", levels=np.logspace(0, 2, 7))
+        ax2.clabel(contour, inline=True, fontsize=10)
+        plt.colorbar(contour)
+        plt.xlim(-0.5,1.5)
+        # plt.ylim(1,3)
+        ax2.set_aspect("equal")
 
         plt.tight_layout()
         plt.show()
@@ -148,9 +186,12 @@ def main():
         c = 1
 
         func = Func(theta, a, c)
-        f_answ = func.quadratic()
+        f_answ = func.calc_quadratic()
         func.lab_one_quadratic(f_answ)
 
+        # f_banana_answ = func.calc_banana()
+        # func.lab_one_banana(f_banana_answ)
+    Func.calc_banana()
 
 
 if __name__ == "__main__":
