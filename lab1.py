@@ -6,13 +6,27 @@ import matplotlib.pyplot as plt
 
 class Func:
 
-    def __init__(self, cx, cy, theta, a, c):
-        self.cx = cx
-        self.cy = cy
+    def __init__(self, theta, a, c):
+
         self.theta = theta
         self.a = a.reshape(-1, 1)
+
+        self.x0 = self._calc_min()
         self.c = c
-        self.xy = np.vstack((cx.ravel(), cy.ravel()))
+
+        self.cx, self.cy = self._get_mashgrid()
+        self.xy = np.vstack((self.cx.ravel(), self.cy.ravel()))
+
+    def _calc_min(self):
+        # Расчет точки минимума
+        return -np.linalg.inv(2 * self.theta) @ self.a
+
+    def _get_mashgrid(self):
+        # Пределы и шаг изменения координат
+        x_limits = np.arange(self.x0[0][0]-1, self.x0[0][0]+1.05, 0.05)
+        y_limits = np.arange(self.x0[1][0]-1, self.x0[1][0]+1.05, 0.05)
+        # Создание координатной сетки
+        return np.meshgrid(x_limits, y_limits)
 
     def quadratic(self):
         f = np.zeros(self.xy.shape[1])
@@ -21,6 +35,8 @@ class Func:
             pp = self.xy[:, i]
             f[i] = np.dot(np.dot(pp.T, self.theta), pp) + np.dot(pp.T, self.a) + self.c
         return f
+
+
 
     def lab_one_quadratic(self, f):
         f = f.reshape(self.cx.shape)
@@ -56,7 +72,6 @@ class Func:
 
         # Расчет точки минимума
         x0 = -np.linalg.inv(2 * self.theta) @ self.a
-        print(x0)
         # Построение собственных векторов в виде отрезков, выходящих из точки x0
         for i in range(len(L)):
             vect = V[:, i]
@@ -99,25 +114,43 @@ def main():
     # c = float(input('c: '))
 
 
+    theta_vars = [
+        [[3, 1], [1, 2]],
+        [[1, 0], [0, 1]],
+        [[3, 0], [0, 1]],
+        [[4, 1], [1, 2]],
+        [[2, 1], [1, 3]],
+        [[15, 3], [3, 1]]
+    ]
+
+    a_vars = [
+        [0, 0],
+        [0, 0],
+        [2, 3],
+        [0, 0],
+        [3, -1],
+        [-1, 2]
+    ]
 
 
-
-    # Пределы и шаг изменения координат
-    x_limits = np.arange(-1, 1.05, 0.05)
-    y_limits = np.arange(-1, 1.05, 0.05)
-
-    # Создание координатной сетки
-    cx, cy = np.meshgrid(x_limits, y_limits)
+    # # Пределы и шаг изменения координат
+    # x_limits = np.arange(-1, 1.05, 0.05)
+    # y_limits = np.arange(-1, 1.05, 0.05)
+    #
+    # # Создание координатной сетки
+    # cx, cy = np.meshgrid(x_limits, y_limits)
     # Объединение cx и cy в единый массив
 
     # Задание параметров квадратичной функции
-    theta = np.array([[3, 1], [1, 2]])
-    a = np.array([0, 0])
-    c = 1
+    for i in range(len(theta_vars)):
+        theta = np.array(theta_vars[i])
+        a = np.array(a_vars[i])
+        c = 1
 
-    func = Func(cx, cy, theta, a, c)
-    f_answ = func.quadratic()
-    func.lab_one_quadratic(f_answ)
+        func = Func(theta, a, c)
+        f_answ = func.quadratic()
+        func.lab_one_quadratic(f_answ)
+
 
 
 if __name__ == "__main__":
